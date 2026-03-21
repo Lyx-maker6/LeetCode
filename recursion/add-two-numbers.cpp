@@ -11,6 +11,29 @@
 class Solution {
 public:
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
-        ListNode* dummy = new ListNode;
+        ListNode* ans = new ListNode;
+        ListNode* p = ans;
+        int carray = 0;//这是进位
+        while(l1 != nullptr || l2 != nullptr || carray != 0)
+        {
+            int sum = carray;
+
+            if(l1 != nullptr)
+            {
+                sum += l1->val;
+                l1=l1->next;
+            }
+            if(l2 != nullptr)
+            {
+                sum += l2->val;
+                l2 = l2->next;
+            }
+
+            carray = sum / 10;
+            p->next = new ListNode(sum % 10);
+            p = p->next;
+
+        }
+        return ans->next;
     }
 };
