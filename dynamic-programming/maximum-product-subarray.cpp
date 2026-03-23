@@ -37,8 +37,8 @@ public:
             }
             else
             {
-                max_dp[i] = min(min_dp[i-1] * cur, cur);
-                min_dp[i] = max(max_dp[i-1] * cur, cur);
+                max_dp[i] = max(min_dp[i-1] * cur, cur);
+                min_dp[i] = min(max_dp[i-1] * cur, cur);
             }
             ans = max(ans, max_dp[i]);
         }
