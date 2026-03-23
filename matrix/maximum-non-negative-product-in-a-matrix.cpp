@@ -15,9 +15,9 @@ public:
         max_dp[0][0] = min_dp[0][0] = grid[0][0];
 
         //step2_2:第一行和第一列的元素从左边来和上面来
-        for(int i = 1;i < r;i++)
-            max_dp[0][i] = min_dp[0][i] = max_dp[0][i-1] * grid[0][i];
         for(int i = 1;i < c;i++)
+            max_dp[0][i] = min_dp[0][i] = max_dp[0][i-1] * grid[0][i];
+        for(int i = 1;i < r;i++)
             max_dp[i][0] = min_dp[i][0] = max_dp[i-1][0] * grid[i][0];
         
         //step3: 填充剩余格子
