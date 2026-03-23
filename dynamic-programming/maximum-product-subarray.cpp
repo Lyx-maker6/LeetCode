@@ -5,7 +5,7 @@ public:
         int min_val = nums[0];
         int ans = nums[0];
 
-        for(int i = 0;i < nums.size(); i++)
+        for(int i = 1;i < nums.size(); i++)
         {
             int num = nums[i];
 
@@ -14,7 +14,7 @@ public:
             
             max_val = max(num, num * max_val);
             min_val = min(num, num * min_val);
-            ans = max(max_val, min_val);
+            ans = max(max_val, ans);
         }
         return ans;
     }
