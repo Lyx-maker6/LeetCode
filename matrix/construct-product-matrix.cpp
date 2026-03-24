@@ -6,7 +6,7 @@ public:
 
         vector<vector<int>> ans(r, vector<int>(c));
 
-        int res = 1;
+        long long res = 1;
 
         for(int i = 0; i < r; i++)
             for(int j = 0; j < c; j++)
