@@ -17,7 +17,7 @@ public:
             for(int j = 0; j < c; j++)
             {
                 int tp = res / grid[i][j];
-                ans[i][j] = tp %12345
+                ans[i][j] = tp % 12345;
             }
         }
         return ans;
