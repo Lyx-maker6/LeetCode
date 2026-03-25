@@ -7,7 +7,7 @@ public:
         vector<int> col(r);
 
         // 1. 计算矩阵总和
-        int total = 0;
+        long long total = 0;
         for (auto& row : grid) {
             for (int num : row) {
                 total += num;
