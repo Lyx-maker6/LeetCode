@@ -25,17 +25,18 @@ public:
             for(int j = 0;j < r;j++)
                 row[i] += grid[j][i];
         
+        int tp = 0;
         for(int i = 0;i < r;i++)
         {
-            int tp = 0;
             tp += col[i];
 
             if(tp == target)
                 return 1;
         }
+
+        tp = 0;//重置tp
         for(int i = 0;i < c;i++)
         {
-            int tp = 0;
             tp += row[i];
 
             if(tp == target)
