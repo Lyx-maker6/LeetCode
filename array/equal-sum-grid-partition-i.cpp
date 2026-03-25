@@ -6,6 +6,17 @@ public:
         vector<int> row(c);
         vector<int> col(r);
 
+        // 1. 计算矩阵总和
+        int total = 0;
+        for (auto& row : grid) {
+            for (int num : row) {
+                total += num;
+            }
+        }
+         // 总和为奇数，不可能分割
+        if (total % 2 != 0) return false;
+        int target = total / 2;
+
         for(int i = 0;i < r;i++)
             for(int j = 0;j < c;j++)
                 col[i] += grid[i][j];
@@ -13,20 +24,14 @@ public:
         for(int i = 0;i < c;i++)
             for(int j = 0;j < r;j++)
                 row[i] += grid[j][i];
-            
-        int sum_r = 0, sum_c = 0;
-        for(int i = 0;i < r;i++)
-            sum_c += col[i];
-        for(int i = 0;i < c;i++)
-            sum_r += row[i];
-
+        
         int flag = 0;
         for(int i = 0;i < r;i++)
         {
             int tp = 0;
             tp += col[i];
 
-            if(tp == sum_c / 2)
+            if(tp == target)
                 return 1;
             else
                 flag=0;
@@ -36,7 +41,7 @@ public:
             int tp = 0;
             tp += row[i];
 
-            if(tp == sum_r / 2)
+            if(tp == target)
                 return 1;
             else
                 flag=0;
