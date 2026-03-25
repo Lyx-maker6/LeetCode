@@ -3,8 +3,8 @@ public:
     bool canPartitionGrid(vector<vector<int>>& grid) {
         int r = grid.size();
         int c = grid[0].size();
-        vector<int> row(c);
-        vector<int> col(r);
+        vector<long long> row(c);
+        vector<long long> col(r);
 
         // 1. 计算矩阵总和
         long long total = 0;
@@ -15,7 +15,7 @@ public:
         }
          // 总和为奇数，不可能分割
         if (total % 2 != 0) return false;
-        int target = total / 2;
+        long long target = total / 2;
 
         for(int i = 0;i < r;i++)
             for(int j = 0;j < c;j++)
@@ -25,7 +25,7 @@ public:
             for(int j = 0;j < r;j++)
                 row[i] += grid[j][i];
         
-        int tp = 0;
+        long long tp = 0;
         for(int i = 0;i < r;i++)
         {
             tp += col[i];
