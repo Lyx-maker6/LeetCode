@@ -25,7 +25,6 @@ public:
             for(int j = 0;j < r;j++)
                 row[i] += grid[j][i];
         
-        int flag = 0;
         for(int i = 0;i < r;i++)
         {
             int tp = 0;
@@ -33,8 +32,6 @@ public:
 
             if(tp == target)
                 return 1;
-            else
-                flag=0;
         }
         for(int i = 0;i < c;i++)
         {
@@ -43,13 +40,8 @@ public:
 
             if(tp == target)
                 return 1;
-            else
-                flag=0;
         }
-
-        if(flag == 0)
-            return 0;
-        
-        return 1;
+        return 0;
+   
     }
 };
