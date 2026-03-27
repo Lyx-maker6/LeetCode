@@ -3,7 +3,11 @@ public:
     bool areSimilar(vector<vector<int>>& mat, int k) {
         int r = mat.size();
         int c = mat[0].size();
-        
+        // 优化点：k 如果很大，模拟会超时。因为每移动 c 次就会回到原点。
+        k %= c;
+        // 如果 k 为 0（包括原值就是 0，或者 k 是 c 的倍数），直接返回 true
+        if (k == 0) return true;
+
         vector<vector<int>> origin = mat; 
         vector<vector<int>> re_mat = mat;
 
@@ -32,11 +36,7 @@ public:
             }
             mat = re_mat;
             cnt++;
-            if(mat==origin)
-                return true; 
         }
-        
-        
-        return false;
+        return mat == origin;
     }
 };
