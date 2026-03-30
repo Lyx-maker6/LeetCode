@@ -5,6 +5,7 @@ public:
         for(int i = 0;i < n;i++)
         {
             if (s1[i] == s2[i]) continue;
+            if(s1[i] != s2[i]) return false;
             for(int j = i + 2;j < n;j +=2)
             {
                 if(s1[j] == s2[i]){
@@ -13,7 +14,7 @@ public:
                 }
 
             }
-            if(s1[i] != s2[i]) return false;
+            
         }
         return s1==s2;
     }
