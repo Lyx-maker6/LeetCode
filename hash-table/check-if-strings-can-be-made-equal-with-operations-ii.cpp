@@ -5,9 +5,10 @@ public:
         string res = s1;
         for(int i = 0;i < n;i++)
         {
-            for(int j = 1;j < n;j++)
+            if (res[i] == s2[i]) continue;
+            for(int j = i+ 2;j < n;j +=2)
             {
-                if((j-i)%2==0)
+                if(res[j] == s2[i])
                     swap(res[i],res[j]);
                 if(res==s2)
                     return true;
