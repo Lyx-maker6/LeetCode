@@ -11,10 +11,9 @@ public:
                     swap(s1[i],s1[j]);
                     break;
                 }
-                    
-    
+
             }
-            
+            if(s1==s2) return true;
         }
         return s1==s2;
     }
