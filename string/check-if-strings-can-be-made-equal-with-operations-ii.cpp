@@ -5,11 +5,12 @@ public:
         string res = s1;
         for(int i = 0;i < n;i++)
         {
-            for(int j = 1;j < n;j++,(j-i)%2==0)
+            for(int j = 1;j < n;j++)
             {
-                swap(res[i],res[j]);
+                if((j-i)%2==0)
+                    swap(res[i],res[j]);
                 if(res==s2)
-                return true;
+                    return true;
             }
             
         }
