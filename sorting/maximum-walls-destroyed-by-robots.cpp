@@ -1,166 +1,77 @@
-typedef struct {
-    int key;
-    int val;
-    UT_hash_handle hh;
-} HashItem;
+class Solution {
+public:
+    int maxWalls(vector<int>& robots, vector<int>& d, vector<int>& walls) {
+        int n = robots.size();
 
-HashItem* hashFindItem(HashItem** obj, int key) {
-    HashItem* pEntry = NULL;
-    HASH_FIND_INT(*obj, &key, pEntry);
-    return pEntry;
-}
+        // Store robots as {position, distance}
+        vector<array<int, 2>> x(n);
+        for (int i = 0; i < n; i++) {
+            x[i] = {robots[i], d[i]};
+        }
 
-bool hashAddItem(HashItem** obj, int key, int val) {
-    if (hashFindItem(obj, key)) {
-        return false;
-    }
-    HashItem* pEntry = (HashItem*)malloc(sizeof(HashItem));
-    pEntry->key = key;
-    pEntry->val = val;
-    HASH_ADD_INT(*obj, key, pEntry);
-    return true;
-}
+        // Sort robots and walls to get everything in order
+        sort(x.begin(), x.end());
+        sort(walls.begin(), walls.end());
 
-bool hashSetItem(HashItem** obj, int key, int val) {
-    HashItem* pEntry = hashFindItem(obj, key);
-    if (!pEntry) {
-        hashAddItem(obj, key, val);
-    } else {
-        pEntry->val = val;
-    }
-    return true;
-}
+        // Dummy robot to avoid boundary checks
+        x.push_back({(int)1e9, 0});
 
-int hashGetItem(HashItem** obj, int key, int defaultVal) {
-    HashItem* pEntry = hashFindItem(obj, key);
-    if (!pEntry) {
-        return defaultVal;
-    }
-    return pEntry->val;
-}
+        // Function to count walls in range [l, r]
+        auto query = [&](int l, int r) -> int {
+            if (l > r) return 0;
+            auto it1 = upper_bound(walls.begin(), walls.end(), r);
+            auto it2 = lower_bound(walls.begin(), walls.end(), l);
+            return it1 - it2;
+        };
 
-void hashFree(HashItem** obj) {
-    HashItem *curr = NULL, *tmp = NULL;
-    HASH_ITER(hh, *obj, curr, tmp) {
-        HASH_DEL(*obj, curr);
-        free(curr);
-    }
-}
+        // dp[i][0] = i-th robot shoots LEFT
+        // dp[i][1] = i-th robot shoots RIGHT
+        vector<array<int, 2>> dp(n);
 
-int cmp(const void* a, const void* b) { return (*(int*)a - *(int*)b); }
+        // Base case (i = 0)- shooting left
+        dp[0][0] = query(x[0][0] - x[0][1], x[0][0]);
 
-int max(int a, int b) { return (a > b) ? a : b; }
-
-int min(int a, int b) { return (a < b) ? a : b; }
-
-int lowerBound(int* arr, int size, int target) {
-    int left = 0, right = size;
-    while (left < right) {
-        int mid = left + (right - left) / 2;
-        if (arr[mid] < target) {
-            left = mid + 1;
+        //shooting right
+        if (n > 1) { 
+            dp[0][1] = query(
+                x[0][0],
+                min(x[1][0] - 1, x[0][0] + x[0][1])
+            );
         } else {
-            right = mid;
-        }
-    }
-    return left;
-}
-
-int upperBound(int* arr, int size, int target) {
-    int left = 0, right = size;
-    while (left < right) {
-        int mid = left + (right - left) / 2;
-        if (arr[mid] <= target) {
-            left = mid + 1;
-        } else {
-            right = mid;
-        }
-    }
-    return left;
-}
-
-int maxWalls(int* robots, int robotsSize, int* distance, int distanceSize,
-             int* walls, int wallsSize) {
-    int n = robotsSize;
-
-    int* left = (int*)calloc(n, sizeof(int));
-    int* right = (int*)calloc(n, sizeof(int));
-    int* num = (int*)calloc(n, sizeof(int));
-    HashItem* robotsToDistance = NULL;
-    for (int i = 0; i < n; i++) {
-        hashAddItem(&robotsToDistance, robots[i], distance[i]);
-    }
-
-    int* sortedRobots = (int*)malloc(n * sizeof(int));
-    memcpy(sortedRobots, robots, n * sizeof(int));
-    qsort(sortedRobots, n, sizeof(int), cmp);
-
-    int* sortedWalls = (int*)malloc(wallsSize * sizeof(int));
-    memcpy(sortedWalls, walls, wallsSize * sizeof(int));
-    qsort(sortedWalls, wallsSize, sizeof(int), cmp);
-
-    for (int i = 0; i < n; i++) {
-        int pos1 = upperBound(sortedWalls, wallsSize, sortedRobots[i]);
-        int leftPos;
-        if (i >= 1) {
-            int leftBound =
-                max(sortedRobots[i] -
-                        hashGetItem(&robotsToDistance, sortedRobots[i], 0),
-                    sortedRobots[i - 1] + 1);
-            leftPos = lowerBound(sortedWalls, wallsSize, leftBound);
-        } else {
-            leftPos =
-                lowerBound(sortedWalls, wallsSize,
-                           sortedRobots[i] - hashGetItem(&robotsToDistance,
-                                                         sortedRobots[i], 0));
-        }
-        left[i] = pos1 - leftPos;
-
-        int rightPos;
-        if (i < n - 1) {
-            int rightBound =
-                min(sortedRobots[i] +
-                        hashGetItem(&robotsToDistance, sortedRobots[i], 0),
-                    sortedRobots[i + 1] - 1);
-            rightPos = upperBound(sortedWalls, wallsSize, rightBound);
-        } else {
-            rightPos =
-                upperBound(sortedWalls, wallsSize,
-                           sortedRobots[i] + hashGetItem(&robotsToDistance,
-                                                         sortedRobots[i], 0));
+            dp[0][1] = query(x[0][0], x[0][0] + x[0][1]);
         }
 
-        int pos2 = lowerBound(sortedWalls, wallsSize, sortedRobots[i]);
-        right[i] = rightPos - pos2;
+        // DP transitions
+        for (int i = 1; i < n; i++) {
 
-        if (i == 0) {
-            continue;
+            // Case 1: shoot RIGHT
+            dp[i][1] = max(dp[i - 1][0], dp[i - 1][1]) +
+                       query(
+                           x[i][0],
+                           min(x[i + 1][0] - 1, x[i][0] + x[i][1])
+                       );
+
+            // Case 2: shoot LEFT (no overlap with previous LEFT)
+            dp[i][0] = dp[i - 1][0] +
+                       query(
+                           max(x[i][0] - x[i][1], x[i - 1][0] + 1),
+                           x[i][0]
+                       );
+
+            // Case 3: shoot LEFT but previous was RIGHT (handle overlap)
+            int leftStart = max(x[i][0] - x[i][1], x[i - 1][0] + 1);
+            int leftEnd   = x[i][0];
+
+            int overlapStart = leftStart;
+            int overlapEnd   = min(x[i - 1][0] + x[i - 1][1], x[i][0] - 1);
+
+            int res = dp[i - 1][1]
+                      + query(leftStart, leftEnd)
+                      - query(overlapStart, overlapEnd);
+
+            dp[i][0] = max(dp[i][0], res);
         }
 
-        int pos3 = lowerBound(sortedWalls, wallsSize, sortedRobots[i - 1]);
-        num[i] = pos1 - pos3;
+        return max(dp[n - 1][0], dp[n - 1][1]);
     }
-
-    int subLeft = left[0];
-    int subRight = right[0];
-
-    for (int i = 1; i < n; i++) {
-        int currentLeft =
-            max(subLeft + left[i],
-                subRight - right[i - 1] + min(left[i] + right[i - 1], num[i]));
-        int currentRight = max(subLeft + right[i], subRight + right[i]);
-        subLeft = currentLeft;
-        subRight = currentRight;
-    }
-
-    int result = max(subLeft, subRight);
-
-    free(left);
-    free(right);
-    free(num);
-    free(sortedRobots);
-    free(sortedWalls);
-    hashFree(&robotsToDistance);
-
-    return result;
-}
+};
