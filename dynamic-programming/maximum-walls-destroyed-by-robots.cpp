@@ -1,63 +1,166 @@
-#include <vector>
-#include <algorithm>
+typedef struct {
+    int key;
+    int val;
+    UT_hash_handle hh;
+} HashItem;
 
-using namespace std;
+HashItem* hashFindItem(HashItem** obj, int key) {
+    HashItem* pEntry = NULL;
+    HASH_FIND_INT(*obj, &key, pEntry);
+    return pEntry;
+}
 
-class Solution {
-public:
-    int maxWalls(vector<int>& robots, vector<int>& distance, vector<int>& walls) {
-        int n = robots.size();
-        vector<pair<int, int>> r(n);
-        for (int i = 0; i < n; i++) r[i] = {robots[i], distance[i]};
-        
-        // 1. 机器人位置排序，确定物理邻居
-        sort(r.begin(), r.end());
-
-        // 2. 墙壁去重并排序
-        sort(walls.begin(), walls.end());
-        walls.erase(unique(walls.begin(), walls.end()), walls.end());
-
-        // 3. 计算每个机器人真实的“火力区间”
-        vector<pair<int, int>> intervals;
-        for (int i = 0; i < n; i++) {
-            int pos = r[i].first;
-            int d = r[i].second;
-
-            // 向左射击：不能击中左邻居，所以左边界 L 最小为 r[i-1].first + 1
-            int L = (i == 0) ? pos - d : max(pos - d, r[i - 1].first + 1);
-            if (L <= pos) intervals.push_back({L, pos});
-
-            // 向右射击：不能击中右邻居，所以右边界 R 最大为 r[i+1].first - 1
-            int R = (i == n - 1) ? pos + d : min(pos + d, r[i + 1].first - 1);
-            if (R >= pos) intervals.push_back({pos, R});
-        }
-
-        // 4. 合并所有重叠的火力区间
-        sort(intervals.begin(), intervals.end());
-        vector<pair<int, int>> merged;
-        if (!intervals.empty()) {
-            merged.push_back(intervals[0]);
-            for (int i = 1; i < (int)intervals.size(); i++) {
-                if (intervals[i].first <= merged.back().second) {
-                    merged.back().second = max(merged.back().second, intervals[i].second);
-                } else {
-                    merged.push_back(intervals[i]);
-                }
-            }
-        }
-
-        // 5. 统计被覆盖的墙壁数量（双指针高效扫描）
-        int ans = 0;
-        int curr_int = 0;
-        for (int w : walls) {
-            while (curr_int < (int)merged.size() && merged[curr_int].second < w) {
-                curr_int++;
-            }
-            if (curr_int < (int)merged.size() && w >= merged[curr_int].first) {
-                ans++;
-            }
-        }
-
-        return ans;
+bool hashAddItem(HashItem** obj, int key, int val) {
+    if (hashFindItem(obj, key)) {
+        return false;
     }
-};
+    HashItem* pEntry = (HashItem*)malloc(sizeof(HashItem));
+    pEntry->key = key;
+    pEntry->val = val;
+    HASH_ADD_INT(*obj, key, pEntry);
+    return true;
+}
+
+bool hashSetItem(HashItem** obj, int key, int val) {
+    HashItem* pEntry = hashFindItem(obj, key);
+    if (!pEntry) {
+        hashAddItem(obj, key, val);
+    } else {
+        pEntry->val = val;
+    }
+    return true;
+}
+
+int hashGetItem(HashItem** obj, int key, int defaultVal) {
+    HashItem* pEntry = hashFindItem(obj, key);
+    if (!pEntry) {
+        return defaultVal;
+    }
+    return pEntry->val;
+}
+
+void hashFree(HashItem** obj) {
+    HashItem *curr = NULL, *tmp = NULL;
+    HASH_ITER(hh, *obj, curr, tmp) {
+        HASH_DEL(*obj, curr);
+        free(curr);
+    }
+}
+
+int cmp(const void* a, const void* b) { return (*(int*)a - *(int*)b); }
+
+int max(int a, int b) { return (a > b) ? a : b; }
+
+int min(int a, int b) { return (a < b) ? a : b; }
+
+int lowerBound(int* arr, int size, int target) {
+    int left = 0, right = size;
+    while (left < right) {
+        int mid = left + (right - left) / 2;
+        if (arr[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid;
+        }
+    }
+    return left;
+}
+
+int upperBound(int* arr, int size, int target) {
+    int left = 0, right = size;
+    while (left < right) {
+        int mid = left + (right - left) / 2;
+        if (arr[mid] <= target) {
+            left = mid + 1;
+        } else {
+            right = mid;
+        }
+    }
+    return left;
+}
+
+int maxWalls(int* robots, int robotsSize, int* distance, int distanceSize,
+             int* walls, int wallsSize) {
+    int n = robotsSize;
+
+    int* left = (int*)calloc(n, sizeof(int));
+    int* right = (int*)calloc(n, sizeof(int));
+    int* num = (int*)calloc(n, sizeof(int));
+    HashItem* robotsToDistance = NULL;
+    for (int i = 0; i < n; i++) {
+        hashAddItem(&robotsToDistance, robots[i], distance[i]);
+    }
+
+    int* sortedRobots = (int*)malloc(n * sizeof(int));
+    memcpy(sortedRobots, robots, n * sizeof(int));
+    qsort(sortedRobots, n, sizeof(int), cmp);
+
+    int* sortedWalls = (int*)malloc(wallsSize * sizeof(int));
+    memcpy(sortedWalls, walls, wallsSize * sizeof(int));
+    qsort(sortedWalls, wallsSize, sizeof(int), cmp);
+
+    for (int i = 0; i < n; i++) {
+        int pos1 = upperBound(sortedWalls, wallsSize, sortedRobots[i]);
+        int leftPos;
+        if (i >= 1) {
+            int leftBound =
+                max(sortedRobots[i] -
+                        hashGetItem(&robotsToDistance, sortedRobots[i], 0),
+                    sortedRobots[i - 1] + 1);
+            leftPos = lowerBound(sortedWalls, wallsSize, leftBound);
+        } else {
+            leftPos =
+                lowerBound(sortedWalls, wallsSize,
+                           sortedRobots[i] - hashGetItem(&robotsToDistance,
+                                                         sortedRobots[i], 0));
+        }
+        left[i] = pos1 - leftPos;
+
+        int rightPos;
+        if (i < n - 1) {
+            int rightBound =
+                min(sortedRobots[i] +
+                        hashGetItem(&robotsToDistance, sortedRobots[i], 0),
+                    sortedRobots[i + 1] - 1);
+            rightPos = upperBound(sortedWalls, wallsSize, rightBound);
+        } else {
+            rightPos =
+                upperBound(sortedWalls, wallsSize,
+                           sortedRobots[i] + hashGetItem(&robotsToDistance,
+                                                         sortedRobots[i], 0));
+        }
+
+        int pos2 = lowerBound(sortedWalls, wallsSize, sortedRobots[i]);
+        right[i] = rightPos - pos2;
+
+        if (i == 0) {
+            continue;
+        }
+
+        int pos3 = lowerBound(sortedWalls, wallsSize, sortedRobots[i - 1]);
+        num[i] = pos1 - pos3;
+    }
+
+    int subLeft = left[0];
+    int subRight = right[0];
+
+    for (int i = 1; i < n; i++) {
+        int currentLeft =
+            max(subLeft + left[i],
+                subRight - right[i - 1] + min(left[i] + right[i - 1], num[i]));
+        int currentRight = max(subLeft + right[i], subRight + right[i]);
+        subLeft = currentLeft;
+        subRight = currentRight;
+    }
+
+    int result = max(subLeft, subRight);
+
+    free(left);
+    free(right);
+    free(num);
+    free(sortedRobots);
+    free(sortedWalls);
+    hashFree(&robotsToDistance);
+
+    return result;
+}
