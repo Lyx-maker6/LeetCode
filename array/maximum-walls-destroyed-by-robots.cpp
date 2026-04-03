@@ -1,55 +1,57 @@
-#include <vector>
-#include <algorithm>
-#include <set>
-
-using namespace std;
-
 class Solution {
 public:
     int maxWalls(vector<int>& robots, vector<int>& distance, vector<int>& walls) {
         int n = robots.size();
-        
-        // 1. 存储机器人位置和距离，并按位置排序
-        vector<pair<int, int>> sorted_robots;
-        for (int i = 0; i < n; ++i) {
-            sorted_robots.push_back({robots[i], distance[i]});
-        }
-        sort(sorted_robots.begin(), sorted_robots.end());
+        // 1. 关联位置和距离并排序
+        vector<pair<int, int>> r(n);
+        for(int i = 0; i < n; i++) r[i] = {robots[i], distance[i]};
+        sort(r.begin(), r.end());
 
-        // 2. 计算每个机器人的有效区间 [left, right]
+        // 2. 收集所有可能的“摧毁区间”
+        // 注意：左射程和右射程要分开，且不能包含机器人自身位置之外的逻辑
         vector<pair<int, int>> intervals;
-        for (int i = 0; i < n; ++i) {
-            int pos = sorted_robots[i].first;
-            int dist = sorted_robots[i].second;
-
-            // 左射程边界：被左边机器人挡住或到达最大距离
-            int left_limit = (i == 0) ? pos - dist : max(pos - dist, sorted_robots[i-1].first);
-            // 右射程边界：被右边机器人挡住或到达最大距离
-            int right_limit = (i == n - 1) ? pos + dist : min(pos + dist, sorted_robots[i+1].first);
-
-            intervals.push_back({left_limit, right_limit});
+        for(int i = 0; i < n; i++) {
+            int pos = r[i].first;
+            int d = r[i].second;
+            
+            // 向左打：最远到 pos-d，但不能过左边的机器人
+            int left_limit = (i == 0) ? pos - d : max(pos - d, r[i-1].first);
+            intervals.push_back({left_limit, pos});
+            
+            // 向右打：最远到 pos+d，但不能过右边的机器人
+            int right_limit = (i == n-1) ? pos + d : min(pos + d, r[i+1].first);
+            intervals.push_back({pos, right_limit});
         }
 
-        // 3. 对区间进行排序，方便后续查找
+        // 3. 墙壁去重并排序
+        sort(walls.begin(), walls.end());
+        walls.erase(unique(walls.begin(), walls.end()), walls.end());
+
+        // 4. 统计有多少墙在区间内
+        // 因为区间多且碎，我们把区间按起点排序，然后合并重叠区间
         sort(intervals.begin(), intervals.end());
-
-        // 4. 统计被摧毁的墙（去重处理）
-        set<int> unique_walls(walls.begin(), walls.end());
-        int count = 0;
-
-        for (int w : unique_walls) {
-            // 使用二分查找看当前墙是否在某个区间内
-            // 查找第一个可能包含 w 的区间（起点 <= w）
-            auto it = lower_bound(intervals.begin(), intervals.end(), make_pair(w, (int)2e9));
-            
-            if (it != intervals.begin()) {
-                --it;
-                if (w >= it->first && w <= it->second) {
-                    count++;
+        vector<pair<int, int>> merged;
+        if(!intervals.empty()) {
+            merged.push_back(intervals[0]);
+            for(int i = 1; i < intervals.size(); i++) {
+                if(intervals[i].first <= merged.back().second) {
+                    merged.back().second = max(merged.back().second, intervals[i].second);
+                } else {
+                    merged.push_back(intervals[i]);
                 }
             }
         }
 
-        return count;
+        int ans = 0;
+        int curr_interval = 0;
+        for(int w : walls) {
+            while(curr_interval < merged.size() && merged[curr_interval].second < w) {
+                curr_interval++;
+            }
+            if(curr_interval < merged.size() && w >= merged[curr_interval].first) {
+                ans++;
+            }
+        }
+        return ans;
     }
-};//不会
+};
