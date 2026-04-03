@@ -8,34 +8,31 @@ public:
     int maxWalls(vector<int>& robots, vector<int>& distance, vector<int>& walls) {
         int n = robots.size();
         vector<pair<int, int>> r(n);
-        for (int i = 0; i < n; i++) {
-            r[i] = {robots[i], distance[i]};
-        }
-        // 1. 机器人必须排序确定邻居
+        for (int i = 0; i < n; i++) r[i] = {robots[i], distance[i]};
         sort(r.begin(), r.end());
 
-        // 2. 墙壁去重
-        sort(walls.begin(), walls.end());
-        walls.erase(unique(walls.begin(), walls.end()), walls.end());
-
-        // 3. 核心：提取所有独立的、不越过邻居的火力区间
+        // 1. 收集所有火力区间，注意边界的开闭逻辑
         vector<pair<int, int>> intervals;
         for (int i = 0; i < n; i++) {
             int pos = r[i].first;
             int d = r[i].second;
 
-            // 左射程：[max(远端, 左邻居), pos]
-            int left_b = (i == 0) ? pos - d : max(pos - d, r[i-1].first);
-            intervals.push_back({left_b, pos});
+            // 向左打：最远 pos-d，但不能碰到左邻居。
+            // 关键：左邻居那个点本身是打不到的，所以 L = 邻居pos + 1
+            int L = (i == 0) ? pos - d : max(pos - d, r[i-1].first + 1);
+            if (L <= pos) intervals.push_back({L, pos});
 
-            // 右射程：[pos, min(远端, 右邻居)]
-            int right_b = (i == n - 1) ? pos + d : min(pos + d, r[i+1].first);
-            intervals.push_back({pos, right_b});
+            // 向右打：最远 pos+d，但不能碰到右邻居。
+            // 关键：右邻居那个点本身是打不到的，所以 R = 邻居pos - 1
+            int R = (i == n - 1) ? pos + d : min(pos + d, r[i+1].first - 1);
+            if (R >= pos) intervals.push_back({pos, R});
         }
 
-        // 4. 区间排序并合并
-        // 虽然机器人相互阻挡，但不同机器人的火力区间可能重叠（比如 A 往右打到 B，B 往左打到 A）
-        // 合并重叠区间是为了用双指针高效统计墙壁
+        // 2. 墙壁去重并排序
+        sort(walls.begin(), walls.end());
+        walls.erase(unique(walls.begin(), walls.end()), walls.end());
+
+        // 3. 合并区间
         sort(intervals.begin(), intervals.end());
         vector<pair<int, int>> merged;
         if (!intervals.empty()) {
@@ -49,20 +46,17 @@ public:
             }
         }
 
-        // 5. 统计在合并区间内的墙壁数量
+        // 4. 双指针统计
         int ans = 0;
-        int interval_idx = 0;
+        int idx = 0;
         for (int w : walls) {
-            // 找到第一个可能覆盖这堵墙的区间
-            while (interval_idx < merged.size() && merged[interval_idx].second < w) {
-                interval_idx++;
+            while (idx < merged.size() && merged[idx].second < w) {
+                idx++;
             }
-            // 检查这堵墙是否在当前区间内
-            if (interval_idx < merged.size() && w >= merged[interval_idx].first) {
+            if (idx < merged.size() && w >= merged[idx].first) {
                 ans++;
             }
         }
-
         return ans;
     }
 };
