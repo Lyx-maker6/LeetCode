@@ -2,34 +2,38 @@ class Solution {
 public:
     int minimumDistance(vector<int>& nums) {
         int n = nums.size();
-        if(n < 3)
-         return -1;
-
-        vector<int> res(3);
         int ans = 0;
-        for(int i = 0;i < n;i++)
+        if(n < 3)
+            return -1;
+        else if(n == 3)
         {
-            for(int j = i + 1; j < n;j++)
+            if(nums[0] == nums[1] && nums[1]== nums[2])
+                return 2 * (2 - 0);
+            else
+                return -1;
+        }
+        else{
+            vector<int> res(3);
+            for(int i = 0;i < n;i++)
             {
-                if(nums[i] == nums[j])
+                for(int j = i + 1; j < n;j++)
                 {
-                    for(int k = j + 1;k < n;k++)
+                    if(nums[i] == nums[j])
                     {
-                        if(nums[j] == nums[k])
+                        for(int k = j + 1;k < n;k++)
                         {
-                            res[0]=i;
-                            res[1]=j;
-                            res[2]=k;
-                            break;
+                            if(nums[j] == nums[k])
+                            {
+                                res[0]=i;
+                                res[2]=k;
+                                break;
+                            }
                         }
                     }
                 }
             }
+            ans = 2 * (res[2] - res[0]);
+            return ans;
         }
-
-        ans = abs(res[0] - res[1]) + abs(res[1] - res[2]) + abs(res[2] - res[0]);
-        return ans;
-
-        
     }
 };
