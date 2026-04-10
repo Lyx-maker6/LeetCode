@@ -25,11 +25,11 @@ public:
                             if(nums[j] == nums[k])
                             {
                                 int d = 2 * (k - i);
-                                if(ans == -1 || d < ans)
+                                if(ans == -1 || d < ans)//如果 ans 还没被赋过值，或者发现了更小的距离
                                 {
                                     ans = d;
-                                    break;
                                 }
+                                 break;
                             }
                         }
                     }
