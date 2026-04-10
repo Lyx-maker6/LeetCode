@@ -24,8 +24,12 @@ public:
                         {
                             if(nums[j] == nums[k])
                             {
-                                ans = 2 * (k - i);
-                                break;
+                                int d = 2 * (k - i);
+                                if(ans == -1 || d < ans)
+                                {
+                                    ans = d;
+                                    break;
+                                }
                             }
                         }
                     }
