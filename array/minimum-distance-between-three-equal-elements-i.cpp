@@ -28,6 +28,8 @@ public:
                                 res[2]=k;
                                 break;
                             }
+                            else
+                                return -1;
                         }
                     }
                 }
