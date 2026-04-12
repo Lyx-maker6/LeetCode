@@ -12,8 +12,10 @@ public:
         vector<int> dp(27, 0); 
         
         for (int i = 0; i < n - 1; ++i) {
+
             int curr = word[i] - 'A';
             int next = word[i+1] - 'A';
+            
             vector<int> next_dp(27, 1e9);
             
             for (int other = 0; other < 27; ++other) {
