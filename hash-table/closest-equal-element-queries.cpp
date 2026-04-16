@@ -28,7 +28,6 @@ public:
 
 
         int m = nums.size();
-        // 预处理：记录每个数字出现的所有下标
         unordered_map<int, vector<int>> pos_map;
         for (int i = 0; i < m; i++) {
             pos_map[nums[i]].push_back(i);
@@ -36,16 +35,24 @@ public:
 
         vector<int> ans;
         for (int q : queries) {
-            int targetVal = nums[q];
-            const vector<int>& indices = pos_map[targetVal];
+            const vector<int>& indices = pos_map[nums[q]];
+            
+            // 使用二分查找找到第一个大于或等于 q 的位置
+            auto it = lower_bound(indices.begin(), indices.end(), q);
             
             int min_v = INT_MAX;
-            // 只需要遍历该数字出现的下标列表，而不是整个数组
-            for (int idx : indices) {
-                if (idx != q) {
-                    int d = abs(idx - q);
-                    int re_d = m - d;
-                    min_v = min(min_v, min(d, re_d));
+            
+            // 检查 it 指向的元素 (右侧最近)
+            if (it != indices.end() && *it != q) {
+                int d = abs(*it - q);
+                min_v = min(min_v, min(d, m - d));
+            }
+            // 检查 it 的前一个元素 (左侧最近)
+            if (it != indices.begin()) {
+                int left_val = *prev(it);
+                if (left_val != q) {
+                    int d = abs(left_val - q);
+                    min_v = min(min_v, min(d, m - d));
                 }
             }
             
