@@ -27,9 +27,6 @@ public:
         // return ans;
 
 
-        class Solution {
-public:
-    vector<int> solveQueries(vector<int>& nums, vector<int>& queries) {
         int m = nums.size();
         // 预处理：记录每个数字出现的所有下标
         unordered_map<int, vector<int>> pos_map;
@@ -55,7 +52,5 @@ public:
             ans.push_back(min_v == INT_MAX ? -1 : min_v);
         }
         return ans;
-    }
-};
     }
 };
