@@ -28,11 +28,11 @@ public:
 
 
         int m = nums.size();
-    unordered_map<int, vector<int>> pos_map;
-    for (int i = 0; i < m; i++) pos_map[nums[i]].push_back(i);
+        unordered_map<int, vector<int>> pos_map;
+        for (int i = 0; i < m; i++) pos_map[nums[i]].push_back(i);
 
-    vector<int> ans;
-    for (int q : queries) {
+        vector<int> ans;
+        for (int q : queries) {
         int targetVal = nums[q];
         if (pos_map[targetVal].size() == 1) { // 如果该数值只有一个索引，则必无解
             ans.push_back(-1); continue;
