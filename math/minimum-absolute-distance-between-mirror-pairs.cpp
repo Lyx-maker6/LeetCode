@@ -19,17 +19,17 @@ public:
         int min_v = INT_MAX;
         for(int i = 0;i < n;i++)
         {
+            int tp = reverse(nums[i]);
+
             for(int j = i + 1;j < n; j++)
             {
-                int tp = reverse(nums[i]);
-
                 if(tp == nums[j])
                 {
                     min_v = min(min_v,abs(i - j));            
                 }
             }
         }
-        return min_v;
+        return (min_v == INT_MAX)? -1 : min_v;
         
     }
 };
