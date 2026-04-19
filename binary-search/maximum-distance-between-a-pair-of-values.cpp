@@ -6,18 +6,34 @@ public:
 
         int max_v = 0;
 
-        for(int i = 0;i < l1;i++)
+        // for(int i = 0;i < l1;i++)
+        // {
+        //     int d = 0;
+        //     for(int j = 0;j < l2;j++)
+        //     {
+        //         if(nums1[i] <= nums2[j] && i <= j)
+        //         {
+        //             d = j - i;
+        //             max_v = max(max_v, d);
+        //         }
+        //     }
+        // }
+
+        int i = 0;
+        int j = 0;
+
+        while(i < l1 && j < l2)
         {
-            int d = 0;
-            for(int j = 0;j < l2;j++)
+            if(nums1[i] <= nums2[j])
             {
-                if(nums1[i] <= nums2[j] && i <= j)
-                {
-                    d = j - i;
-                    max_v = max(max_v, d);
-                }
+                max_v = max(max_v, j - i);
+                j++
+            }
+            else{
+                i++;
             }
         }
+
         return max_v;
     }
 };
