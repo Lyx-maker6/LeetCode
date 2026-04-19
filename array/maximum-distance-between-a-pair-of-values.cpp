@@ -4,7 +4,7 @@ public:
         int l1 = nums1.size();
         int l2 = nums2.size();
 
-        int max_v = INT_MIN;
+        int max_v = 0;
 
         for(int i = 0;i < l1;i++)
         {
@@ -16,7 +16,6 @@ public:
                     d = j - i;
                     max_v = max(max_v, d);
                 }
-
             }
         }
         return max_v;
