@@ -27,10 +27,13 @@ public:
             if(nums1[i] <= nums2[j])
             {
                 max_v = max(max_v, j - i);
-                j++
+                j++;
             }
             else{
                 i++;
+
+                //优化：i 增加后，j 没必要重置，因为 i <= j 且之前的 j 已经测试过了
+                if (i > j) j = i;
             }
         }
 
